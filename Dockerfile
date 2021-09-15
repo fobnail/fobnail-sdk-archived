@@ -4,7 +4,6 @@ MAINTAINER Piotr Król <piotr.krol@3mdeb.com>
 RUN apt-get update && apt-get upgrade -y
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
     git \
-    cmake \
     ninja-build \
     gperf \
     ccache \
@@ -68,6 +67,13 @@ RUN curl https://www.nordicsemi.com/-/media/Software-and-other-downloads/Desktop
     rm /tmp/nRF-Command-Line-Tools_{{NRF_CMDLINE_VER}}_Linux-x86_64.zip && cd /tmp/nrftools && \
     dpkg -i nrf-command-line-tools_{{NRF_CMDLINE_VER_DOTS}}_amd64.deb && rm -rf /tmp/nrftools
 
+# compile cmake
+RUN mkdir /opt/cmake && cd /opt/cmake && \
+    wget --progress=bar:force:noscroll \
+    https://cmake.org/files/v{{CMAKE_VER_MAJOR}}.{{CMAKE_VER_MINOR}}/cmake-{{CMAKE_VER}}-linux-x86_64.sh && \
+    yes | sh cmake-{{CMAKE_VER}}-linux-x86_64.sh | cat
+
+
 RUN useradd -ms /bin/bash build && \
     usermod -aG sudo build
 
@@ -77,7 +83,7 @@ WORKDIR /home/build
 
 WORKDIR /home/build/zephyr
 
-ENV PATH="/opt/nrf-command-line-tools/bin${PATH}"
+ENV PATH="/opt/cmake/cmake-{{CMAKE_VER}}-linux-x86_64/bin:/opt/nrf-command-line-tools/bin${PATH}"
 ENV LC_ALL en_US.UTF-8
 ENV ZEPHYR_TOOLCHAIN_VARIANT zephyr
 ENV ZEPHYR_SDK_INSTALL_DIR /opt/zephyr-sdk
