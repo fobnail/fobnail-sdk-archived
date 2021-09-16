@@ -19,6 +19,8 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends 
     make \
     gcc \
     gcc-multilib \
+    g++ \
+    golang \
     locales \
     libtool \
     autotools-dev \
@@ -73,17 +75,16 @@ RUN mkdir /opt/cmake && cd /opt/cmake && \
     https://cmake.org/files/v{{CMAKE_VER_MAJOR}}.{{CMAKE_VER_MINOR}}/cmake-{{CMAKE_VER}}-linux-x86_64.sh && \
     yes | sh cmake-{{CMAKE_VER}}-linux-x86_64.sh | cat
 
+ENV GOPATH=/opt/go
+RUN go get github.com/apache/mynewt-mcumgr-cli/mcumgr
 
 RUN useradd -ms /bin/bash build && \
-    usermod -aG sudo build
+    usermod -aG sudo,dialout build
 
 USER build
-
 WORKDIR /home/build
 
-WORKDIR /home/build/zephyr
-
-ENV PATH="/opt/cmake/cmake-{{CMAKE_VER}}-linux-x86_64/bin:/opt/nrf-command-line-tools/bin${PATH}"
+ENV PATH="/opt/go/bin:/opt/cmake/cmake-{{CMAKE_VER}}-linux-x86_64/bin:/opt/nrf-command-line-tools/bin${PATH}"
 ENV LC_ALL en_US.UTF-8
 ENV ZEPHYR_TOOLCHAIN_VARIANT zephyr
 ENV ZEPHYR_SDK_INSTALL_DIR /opt/zephyr-sdk
