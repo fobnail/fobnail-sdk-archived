@@ -9,4 +9,11 @@ RUN apt-get update && apt-get install -y \
 
 RUN rustup target add thumbv7em-none-eabihf
 
-RUN cargo install cargo-embed
+RUN cargo install cargo-embed && cargo install probe-rs-cli
+
+RUN useradd -ms /bin/bash build && \
+    usermod -aG sudo,dialout build && \
+    echo 'export CARGO_HOME=~/.cargo' >> /home/build/.bashrc
+
+USER build
+WORKDIR /home/build
